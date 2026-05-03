@@ -22,6 +22,7 @@ export default function Editor() {
 
   const [template, setTemplate] = useState(null);
   const [name, setName] = useState(user?.name || '');
+  const [wishes, setWishes] = useState('');
   const [profilePic, setProfilePic] = useState(user?.profilePic || '');
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [error, setError] = useState('');
@@ -46,11 +47,12 @@ export default function Editor() {
       canvas: canvasRef.current,
       templateUrl: template.imageUrl,
       name: name || 'Your Name',
+      wishes,
       profilePic,
       overlayConfig: template.overlayConfig,
       maxWidth: 1024,
     }).catch((err) => setError(err.message));
-  }, [template, name, profilePic]);
+  }, [template, name, wishes, profilePic]);
 
   async function onPicChange(e) {
     const file = e.target.files?.[0];
@@ -160,6 +162,19 @@ export default function Editor() {
             onChange={(e) => setName(e.target.value)}
             className="mt-1 w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
+        </label>
+
+        <label className="block">
+          <span className="text-sm text-slate-600">Your wishes</span>
+          <textarea
+            value={wishes}
+            onChange={(e) => setWishes(e.target.value)}
+            placeholder="e.g. Wishing you a wonderful birthday filled with joy!"
+            rows={3}
+            maxLength={140}
+            className="mt-1 w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+          />
+          <span className="text-xs text-slate-400">{wishes.length}/140</span>
         </label>
 
         <label className="block">

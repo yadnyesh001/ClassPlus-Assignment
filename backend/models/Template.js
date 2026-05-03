@@ -14,6 +14,14 @@ const overlaySchema = new mongoose.Schema(
       y: { type: Number, default: 0.12 },
       radius: { type: Number, default: 0.08 },
     },
+    wishes: {
+      x: { type: Number, default: 0.5 },
+      y: { type: Number, default: 0.85 },
+      fontSize: { type: Number, default: 0.035 },
+      color: { type: String, default: '#ffffff' },
+      align: { type: String, default: 'center' },
+      maxWidth: { type: Number, default: 0.8 },
+    },
   },
   { _id: false }
 );

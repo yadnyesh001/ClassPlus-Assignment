@@ -1,6 +1,14 @@
 const DEFAULT_CONFIG = {
   name: { x: 0.5, y: 0.12, fontSize: 0.06, color: '#ffffff', align: 'center' },
   profile: { x: 0.12, y: 0.12, radius: 0.08 },
+  wishes: {
+    x: 0.5,
+    y: 0.85,
+    fontSize: 0.035,
+    color: '#ffffff',
+    align: 'center',
+    maxWidth: 0.8,
+  },
 };
 
 function loadImage(src) {
@@ -17,7 +25,31 @@ function mergeConfig(cfg = {}) {
   return {
     name: { ...DEFAULT_CONFIG.name, ...(cfg.name || {}) },
     profile: { ...DEFAULT_CONFIG.profile, ...(cfg.profile || {}) },
+    wishes: { ...DEFAULT_CONFIG.wishes, ...(cfg.wishes || {}) },
   };
+}
+
+function wrapText(ctx, text, maxWidth) {
+  const lines = [];
+  for (const paragraph of text.split('\n')) {
+    const words = paragraph.split(/\s+/).filter(Boolean);
+    if (words.length === 0) {
+      lines.push('');
+      continue;
+    }
+    let line = words[0];
+    for (let i = 1; i < words.length; i++) {
+      const test = `${line} ${words[i]}`;
+      if (ctx.measureText(test).width > maxWidth) {
+        lines.push(line);
+        line = words[i];
+      } else {
+        line = test;
+      }
+    }
+    lines.push(line);
+  }
+  return lines;
 }
 
 /**
@@ -30,6 +62,7 @@ export async function renderGreeting({
   canvas,
   templateUrl,
   name,
+  wishes,
   profilePic,
   overlayConfig,
   maxWidth,
@@ -113,6 +146,29 @@ export async function renderGreeting({
     ctx.shadowBlur = Math.max(2, fontPx * 0.12);
     ctx.shadowOffsetY = 2;
     ctx.fillText(name, cfg.name.x * W, cfg.name.y * H);
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
+  }
+
+  // Wishes overlay (multi-line, wrapped)
+  if (wishes && wishes.trim()) {
+    const fontPx = Math.max(12, cfg.wishes.fontSize * H);
+    ctx.font = `500 ${fontPx}px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`;
+    ctx.textAlign = cfg.wishes.align;
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = cfg.wishes.color;
+    ctx.shadowColor = 'rgba(0,0,0,0.55)';
+    ctx.shadowBlur = Math.max(2, fontPx * 0.18);
+    ctx.shadowOffsetY = 2;
+
+    const lines = wrapText(ctx, wishes.trim(), cfg.wishes.maxWidth * W);
+    const lineHeight = fontPx * 1.25;
+    const totalHeight = lineHeight * lines.length;
+    const startY = cfg.wishes.y * H - totalHeight / 2 + lineHeight / 2;
+    for (let i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], cfg.wishes.x * W, startY + i * lineHeight);
+    }
+
     ctx.shadowBlur = 0;
     ctx.shadowOffsetY = 0;
   }
