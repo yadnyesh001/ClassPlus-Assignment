@@ -1,0 +1,6 @@
+start
+node: v24.15.0
+mongo uri set: true
+jwt set: true
+CONNECTED
+disconnected
