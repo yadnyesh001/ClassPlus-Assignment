@@ -1,25 +1,29 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../services/api.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import TemplateCard from '../components/TemplateCard.jsx';
 import PremiumModal from '../components/PremiumModal.jsx';
 
 export default function Home() {
-  const { user, continueAsGuest } = useAuth();
+  const { user, isGuest } = useAuth();
+  const isLoggedIn = !!user && !isGuest;
   const navigate = useNavigate();
   const [templates, setTemplates] = useState([]);
   const [activeCategory, setActiveCategory] = useState('All');
   const [premiumOpen, setPremiumOpen] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [guestName, setGuestName] = useState('');
 
   useEffect(() => {
+    if (!isLoggedIn) {
+      setLoading(false);
+      return;
+    }
     api
       .templates()
       .then((data) => setTemplates(data))
       .finally(() => setLoading(false));
-  }, []);
+  }, [isLoggedIn]);
 
   const categories = useMemo(() => {
     const set = new Set(templates.map((t) => t.category));
@@ -45,10 +49,33 @@ export default function Home() {
     navigate(`/editor/${tpl._id}`);
   }
 
+  if (!isLoggedIn) {
+    return (
+      <div className="max-w-md mx-auto px-4 py-16 text-center">
+        <h1 className="text-2xl font-semibold text-slate-800">Sign in to browse greetings</h1>
+        <p className="text-slate-500 text-sm mt-2">
+          Log in or create an account to pick a template and personalize it with your name and photo.
+        </p>
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <Link
+            to="/login"
+            className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+          >
+            Log in
+          </Link>
+          <Link
+            to="/register"
+            className="border border-slate-300 text-slate-700 px-4 py-2 rounded-md hover:bg-slate-50"
+          >
+            Sign up
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      
-
       <h1 className="text-2xl font-semibold text-slate-800">Pick a greeting</h1>
       <p className="text-slate-500 text-sm">
         Tap a template to personalize and download.

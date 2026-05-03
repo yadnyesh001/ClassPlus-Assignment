@@ -8,9 +8,9 @@ import Editor from './pages/Editor.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 
 function Gate({ children }) {
-  const { user, loading } = useAuth();
+  const { user, isGuest, loading } = useAuth();
   if (loading) return <div className="p-8 text-slate-500">Loading…</div>;
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user || isGuest) return <Navigate to="/login" replace />;
   return children;
 }
 
@@ -31,7 +31,14 @@ export default function App() {
               </Gate>
             }
           />
-          <Route path="/editor/:id" element={<Editor />} />
+          <Route
+            path="/editor/:id"
+            element={
+              <Gate>
+                <Editor />
+              </Gate>
+            }
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
